@@ -1,7 +1,9 @@
+;; ============================================================================
 ;;; Emfy 0.2.0 <https://github.com/susam/emfy>
+;; ============================================================================
 
 ;; Customize user interface.
-(menu-bar-mode 0)
+(menu-bar-mode 1)                  ; Not digging the "hide the menu bar" trend.
 (when (display-graphic-p)
   (tool-bar-mode 0)
   (scroll-bar-mode 0))
@@ -55,6 +57,7 @@
 ;; Do not move the current file while creating backup.
 (setq backup-by-copying t)
 
+
 ;; Disable lockfiles.
 (setq create-lockfiles nil)
 
@@ -66,6 +69,10 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file t)
 
+;; ============================================================================
+;; Install packages.
+;; ============================================================================
+
 ;; Enable installation of packages from MELPA.
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -73,21 +80,18 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
-;; Install packages.
-(dolist (package
-         '(counsel
-           evil
-           evil-leader ; Replace this with general
-                       ; https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/
-           markdown-mode
-           paredit
-           rainbow-delimiters
-           which-key))
-  (unless (package-installed-p package)
-    (package-install package)))
+(dolist (package '(evil
+                   general
+                   magit
+                   paredit
+                   projectile
+                   rainbow-delimiters
+                   which-key))
+  (unless (package-installed-p package) (package-install package)))
 
-;; Enable evil-leader before enabling evil-mode
-(global-evil-leader-mode)
+;; ============================================================================
+;; Package Configuration.
+;; ============================================================================
 
 ;; Enable Evil.
 (evil-mode 1)
@@ -120,22 +124,79 @@
 ;; Enable which-key
 (which-key-mode)
 
+;; org-mode configuration
+(setf org-src-fontify-natively t)
+(setq org-confirm-babel-evaluate nil)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((awk . t)
+   (emacs-lisp . t)
+   (js . t)
+   (ledger . t)
+   (python . t)
+   (R . t)
+   (sqlite . t)))
+
+(custom-set-faces
+ '(org-block ((t (:background "#212121" :extend t)))))
+
+;; ============================================================================
 ;; Custom command.
-(defun show-current-time ()
-  "Show current time."
+;; ============================================================================
+
+(defun open-init-el ()
+  "Open the main user configuration file."
   (interactive)
-  (message (current-time-string)))
+  (find-file "~/.emacs.emfy/init.el"))
 
-;; Cool start, but replace with general
-(evil-leader/set-leader "<SPC>")
-(evil-leader/set-key "<SPC>" 'counsel-M-x)
+(defun open-main-org-file ()
+  "Open the main org-mode file."
+  (interactive)
+  (find-file "~/org/main.org"))
 
+(defun org-rclone-fetch ()
+  "Calls rclone to copy from dropbox to local"
+  (interactive)
+  (shell-command "rclone copy dropbachs:org /home/joe/org"))
+
+(defun org-rclone-push ()
+  "Calls rclone to copy from local to dropbox"
+  (interactive)
+  (shell-command "rclone copy /home/joe/org dropbachs:org"))
+
+;; ============================================================================
 ;; Custom key sequences.
-(global-set-key (kbd "C-c t") 'show-current-time)
-(global-set-key (kbd "C-c d") 'delete-trailing-whitespace)
-(global-set-key (kbd "M-x") 'counsel-M-x)
+;; ============================================================================
 
+(general-define-key
+ :states '(normal visual insert emacs)
+ :prefix "SPC"
+ :non-normal-prefix "C-SPC"
+
+ "TAB" '(switch-to-other-buffer :which-key "prev buffer")
+ "SPC" '(execute-extended-command :which-key "M-x")
+
+ "a" '(:ignore t :which-key "Applications")
+
+ "b" '(:ignore t :which-key "Buffers")
+ "bd" '(kill-buffer :which-key "delete buffer")
+
+ "f" '(:ignore t :which-key "Files")
+ "fi" '(open-init-el :which-key "open init.el")
+ "ff" 'find-file
+ "fo" 'open-main-org-file
+
+ "o" '(:ignore t :which-key "Org")
+ "oa" 'org-agenda
+ "os" '(:ignore t :which-key "Sync with cloud")
+ "osf" 'org-rclone-fetch
+ "osp" 'org-rclone-push)
+
+;; ============================================================================
 ;; Start server.
+;; ============================================================================
+
 (require 'server)
 (unless (server-running-p)
   (server-start))
