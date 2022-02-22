@@ -181,11 +181,15 @@
 
  "b" '(:ignore t :which-key "Buffers")
  "bd" '(kill-buffer :which-key "delete buffer")
+ "be" '(eval-buffer :which-key "eval buffer")
+ "bn" '(next-buffer :which-key "next buffer")
 
  "f" '(:ignore t :which-key "Files")
  "fi" '(open-init-el :which-key "open init.el")
  "ff" 'find-file
  "fo" 'open-main-org-file
+
+ "g" 'magit-dispatch
 
  "o" '(:ignore t :which-key "Org")
  "oa" 'org-agenda
