@@ -9,16 +9,6 @@
 (setq inhibit-startup-screen t)
 (column-number-mode)
 
-;; Dark theme.
-(load-theme 'wombat)
-(set-face-background 'default "#111")
-(set-face-background 'cursor "#c96")
-(set-face-background 'isearch "#c60")
-(set-face-foreground 'isearch "#eee")
-(set-face-background 'lazy-highlight "#960")
-(set-face-foreground 'lazy-highlight "#ccc")
-(set-face-foreground 'font-lock-comment-face "#fc0")
-
 ;; Interactively do things.
 (ido-mode 1)
 (ido-everywhere)
@@ -56,18 +46,14 @@
 ;; Do not move the current file while creating backup.
 (setq backup-by-copying t)
 
-
 ;; Disable lockfiles.
 (setq create-lockfiles nil)
-
-;; Workaround for https://debbugs.gnu.org/34341 in GNU Emacs <= 26.3.
-(when (and (version< emacs-version "26.3") (>= libgnutls-version 30603))
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 
 ;; Write customizations to a separate file instead of this file.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file t)
 
+;; slime
 (load (expand-file-name "~/quicklisp/slime-helper.el"))
 (setq inferior-lisp-program "sbcl")
 
@@ -142,7 +128,6 @@
 
 (require 'ox-reveal)
 
-
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((awk . t)
@@ -153,8 +138,7 @@
    (R . t)
    (sqlite . t)))
 
-(custom-set-faces
- '(org-block ((t (:background "#212121" :extend t)))))
+(custom-set-faces '(org-block ((t (:background "#eeeeee" :extend t)))))
 
 ;; ============================================================================
 ;; Custom command.
@@ -169,16 +153,6 @@
   "Open the main 'org-mode' file."
   (interactive)
   (find-file "~/org/main.org"))
-
-(defun org-rclone-fetch ()
-  "Call rclone to copy from dropbox to local."
-  (interactive)
-  (shell-command "rclone copy dropbachs:org /home/joe/org"))
-
-(defun org-rclone-push ()
-  "Call rclone to copy from local to dropbox."
-  (interactive)
-  (shell-command "rclone copy /home/joe/org dropbachs:org"))
 
 ;; ============================================================================
 ;; Custom key sequences.
