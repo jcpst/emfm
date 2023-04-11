@@ -3,21 +3,12 @@
 ;; ============================================================================
 
 ;; Customize user interface.
+(menu-bar-mode 1)                  ; Not digging the "hide the menu bar" trend.
 (when (display-graphic-p)
   (tool-bar-mode 0)
   (scroll-bar-mode 0))
 (setq inhibit-startup-screen t)
 (column-number-mode)
-
-;; Dark theme.
-(load-theme 'wombat)
-(set-face-background 'default "#111")
-(set-face-background 'cursor "#c96")
-(set-face-background 'isearch "#c60")
-(set-face-foreground 'isearch "#eee")
-(set-face-background 'lazy-highlight "#960")
-(set-face-foreground 'lazy-highlight "#ccc")
-(set-face-foreground 'font-lock-comment-face "#fc0")
 
 ;; Interactively do things.
 (ido-mode 1)
@@ -49,12 +40,16 @@
 (show-paren-mode)
 
 ;; Write auto-saves and backups to separate directory.
-(make-directory "~/.tmp/emacs/auto-save/" t)
-(setq auto-save-file-name-transforms '((".*" "~/.tmp/emacs/auto-save/" t)))
-(setq backup-directory-alist '(("." . "~/.tmp/emacs/backup/")))
+;(make-directory "~/.tmp/emacs/auto-save/" t)
+;(setq auto-save-file-name-transforms '((".*" "~/.tmp/emacs/auto-save/" t)))
+;(setq backup-directory-alist '(("." . "~/.tmp/emacs/backup/")))
 
+;; Auto Save
+(auto-save-visited-mode 1)
+(global-auto-revert-mode 1)
+(setq auto-revert-use-notify nil)
 ;; Do not move the current file while creating backup.
-(setq backup-by-copying t)
+;(setq backup-by-copying t)
 
 
 ;; Disable lockfiles.
@@ -68,9 +63,6 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file t)
 
-(load (expand-file-name "~/quicklisp/slime-helper.el"))
-(setq inferior-lisp-program "sbcl")
-
 ;; ============================================================================
 ;; Install packages.
 ;; ============================================================================
@@ -82,15 +74,9 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
-; Don't forget to run this afterward:
-; M-x package-refresh-contents
-(dolist (package '(company
-                   evil
-                   flycheck
+(dolist (package '(evil
                    general
                    magit
-                   ob-mermaid
-                   ox-reveal
                    paredit
                    projectile
                    rainbow-delimiters
@@ -101,14 +87,8 @@
 ;; Package Configuration.
 ;; ============================================================================
 
-;; Enable Company.
-(add-hook 'after-init-hook 'global-company-mode)
-
 ;; Enable Evil.
 (evil-mode 1)
-
-;; Enable Flycheck
-(global-flycheck-mode)
 
 ;; Enable Paredit.
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
@@ -117,9 +97,14 @@
 (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode)
 (add-hook 'lisp-mode-hook 'enable-paredit-mode)
 
-;; Enable and Customize Rainbow Delimiters.
+;; Enable Rainbow Delimiters.
+(add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'ielm-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'lisp-interaction-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
+
+;; Customize Rainbow Delimiters.
 (require 'rainbow-delimiters)
-(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 (set-face-foreground 'rainbow-delimiters-depth-1-face "#c66")  ; red
 (set-face-foreground 'rainbow-delimiters-depth-2-face "#6c6")  ; green
 (set-face-foreground 'rainbow-delimiters-depth-3-face "#69f")  ; blue
@@ -136,19 +121,14 @@
 ;; org-mode configuration
 (setf org-src-fontify-natively t)
 (setq org-confirm-babel-evaluate nil)
-(setq org-hide-emphasis-markers t)
-
-(setq ob-mermaid-cli-path "~/scoop/persist/nodejs/bin/")
-
-(require 'ox-reveal)
-
 
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((awk . t)
    (emacs-lisp . t)
    (js . t)
-   (mermaid . t)
+   (ledger . t)
+   (lilypond . t)
    (python . t)
    (R . t)
    (sqlite . t)))
@@ -166,26 +146,13 @@
   (find-file "~/.emacs.emfy/init.el"))
 
 (defun open-main-org-file ()
-  "Open the main 'org-mode' file."
+  "Open the main org-mode file."
   (interactive)
   (find-file "~/org/main.org"))
-
-(defun org-rclone-fetch ()
-  "Call rclone to copy from dropbox to local."
-  (interactive)
-  (shell-command "rclone copy dropbachs:org /home/joe/org"))
-
-(defun org-rclone-push ()
-  "Call rclone to copy from local to dropbox."
-  (interactive)
-  (shell-command "rclone copy /home/joe/org dropbachs:org"))
 
 ;; ============================================================================
 ;; Custom key sequences.
 ;; ============================================================================
-
-; https://emacs.stackexchange.com/a/28224
-(evil-define-key 'normal org-mode-map (kbd "<tab>") #'org-cycle)
 
 (general-define-key
  :states '(normal visual insert emacs)
@@ -198,17 +165,12 @@
  "a" '(:ignore t :which-key "Applications")
 
  "b" '(:ignore t :which-key "Buffers")
- "bb" '(switch-to-buffer :which-key "switch buffer")
  "bd" '(kill-buffer :which-key "delete buffer")
- "be" '(eval-buffer :which-key "eval buffer")
- "bn" '(next-buffer :which-key "next buffer")
 
  "f" '(:ignore t :which-key "Files")
  "fi" '(open-init-el :which-key "open init.el")
  "ff" 'find-file
  "fo" 'open-main-org-file
-
- "g" 'magit-dispatch
 
  "o" '(:ignore t :which-key "Org")
  "oa" 'org-agenda
