@@ -3,21 +3,12 @@
 ;; ============================================================================
 
 ;; Customize user interface.
+(menu-bar-mode 1)
 (when (display-graphic-p)
   (tool-bar-mode 0)
   (scroll-bar-mode 0))
 (setq inhibit-startup-screen t)
 (column-number-mode)
-
-;; Dark theme.
-(load-theme 'wombat)
-(set-face-background 'default "#111")
-(set-face-background 'cursor "#c96")
-(set-face-background 'isearch "#c60")
-(set-face-foreground 'isearch "#eee")
-(set-face-background 'lazy-highlight "#960")
-(set-face-foreground 'lazy-highlight "#ccc")
-(set-face-foreground 'font-lock-comment-face "#fc0")
 
 ;; Interactively do things.
 (ido-mode 1)
@@ -48,26 +39,19 @@
 (setq show-paren-delay 0)
 (show-paren-mode)
 
-;; Write auto-saves and backups to separate directory.
-(make-directory "~/.tmp/emacs/auto-save/" t)
-(setq auto-save-file-name-transforms '((".*" "~/.tmp/emacs/auto-save/" t)))
-(setq backup-directory-alist '(("." . "~/.tmp/emacs/backup/")))
-
-;; Do not move the current file while creating backup.
-(setq backup-by-copying t)
-
+;; Autosave
+(auto-save-visited-mode 1)
+(global-auto-revert-mode 1)
+(setq auto-revert-use-notify nil)
 
 ;; Disable lockfiles.
 (setq create-lockfiles nil)
-
-;; Workaround for https://debbugs.gnu.org/34341 in GNU Emacs <= 26.3.
-(when (and (version< emacs-version "26.3") (>= libgnutls-version 30603))
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 
 ;; Write customizations to a separate file instead of this file.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file t)
 
+;; slime
 (load (expand-file-name "~/quicklisp/slime-helper.el"))
 (setq inferior-lisp-program "sbcl")
 
@@ -120,15 +104,10 @@
 ;; Enable and Customize Rainbow Delimiters.
 (require 'rainbow-delimiters)
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
-(set-face-foreground 'rainbow-delimiters-depth-1-face "#c66")  ; red
-(set-face-foreground 'rainbow-delimiters-depth-2-face "#6c6")  ; green
-(set-face-foreground 'rainbow-delimiters-depth-3-face "#69f")  ; blue
-(set-face-foreground 'rainbow-delimiters-depth-4-face "#cc6")  ; yellow
-(set-face-foreground 'rainbow-delimiters-depth-5-face "#6cc")  ; cyan
-(set-face-foreground 'rainbow-delimiters-depth-6-face "#c6c")  ; magenta
-(set-face-foreground 'rainbow-delimiters-depth-7-face "#ccc")  ; light gray
-(set-face-foreground 'rainbow-delimiters-depth-8-face "#999")  ; medium gray
-(set-face-foreground 'rainbow-delimiters-depth-9-face "#666")  ; dark gray
+(add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'ielm-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'lisp-interaction-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
 
 ;; Enable which-key
 (which-key-mode)
@@ -142,19 +121,19 @@
 
 (require 'ox-reveal)
 
-
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((awk . t)
    (emacs-lisp . t)
    (js . t)
+   (ledger . t)
+   (lilypond . t)
    (mermaid . t)
    (python . t)
    (R . t)
    (sqlite . t)))
 
-(custom-set-faces
- '(org-block ((t (:background "#212121" :extend t)))))
+(custom-set-faces '(org-block ((t (:background "#eeeeee" :extend t)))))
 
 ;; ============================================================================
 ;; Custom command.
@@ -166,19 +145,9 @@
   (find-file "~/.emacs.emfy/init.el"))
 
 (defun open-main-org-file ()
-  "Open the main 'org-mode' file."
+  "Open the main org mode file."
   (interactive)
   (find-file "~/org/main.org"))
-
-(defun org-rclone-fetch ()
-  "Call rclone to copy from dropbox to local."
-  (interactive)
-  (shell-command "rclone copy dropbachs:org /home/joe/org"))
-
-(defun org-rclone-push ()
-  "Call rclone to copy from local to dropbox."
-  (interactive)
-  (shell-command "rclone copy /home/joe/org dropbachs:org"))
 
 ;; ============================================================================
 ;; Custom key sequences.
