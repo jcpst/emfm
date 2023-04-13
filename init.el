@@ -126,7 +126,6 @@
  '((awk . t)
    (emacs-lisp . t)
    (js . t)
-   (ledger . t)
    (lilypond . t)
    (mermaid . t)
    (python . t)
